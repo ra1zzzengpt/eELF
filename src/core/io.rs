@@ -1,7 +1,7 @@
 use crate::core::error::{Error, ErrorType};
 
 pub fn get_params_without_first() -> Result<Vec<String>, Error> {
-    std::env::args_os()
+    let params: Vec<String> = std::env::args_os()
         .skip(1)
         .into_iter()
         .map(|arg| {
@@ -12,7 +12,14 @@ pub fn get_params_without_first() -> Result<Vec<String>, Error> {
                 )
             })
         })
-        .collect()
+        .collect::<Result<Vec<String>, Error>>()?;
+    if params.is_empty() {
+        return Err(Error::new(
+            ErrorType::ArgumentsError,
+            "Empty arguments".to_string(),
+        ));
+    }
+    Ok(params)
 }
 
 pub fn print_error(error: &Error) {

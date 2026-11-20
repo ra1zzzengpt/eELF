@@ -6,6 +6,8 @@ pub enum ErrorType {
     ArgumentsError,
     ReadFailed,
     NotELFFile,
+    UnknownELFClass,
+    UnknownELFEndianness,
 }
 
 impl Display for ErrorType {
@@ -22,6 +24,12 @@ impl Display for ErrorType {
             }
             ErrorType::NotELFFile => {
                 write!(f, "NotELFFile")
+            }
+            ErrorType::UnknownELFClass => {
+                write!(f, "UnknownELFClass")
+            }
+            ErrorType::UnknownELFEndianness => {
+                write!(f, "UnknownELFEndianness")
             }
         }
     }
