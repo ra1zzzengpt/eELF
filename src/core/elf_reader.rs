@@ -4,7 +4,7 @@ use std::io::Read;
 
 fn read_sign(file: &mut std::fs::File, info: &mut ELFIdentity) -> Result<(), Error> {
     let mut header_buff: [u8; 4] = [0; 4];
-    file.read(&mut header_buff)
+    file.read_exact(&mut header_buff)
         .map_err(|err| Error::new(ErrorType::ReadFailed, err.to_string()))?;
     if (header_buff[0] == 0x7F)
         && (header_buff[1] == 0x45)
@@ -22,7 +22,7 @@ fn read_sign(file: &mut std::fs::File, info: &mut ELFIdentity) -> Result<(), Err
 
 fn read_class(file: &mut std::fs::File, info: &mut ELFIdentity) -> Result<(), Error> {
     let mut class_buff: [u8; 1] = [0; 1];
-    file.read(&mut class_buff)
+    file.read_exact(&mut class_buff)
         .map_err(|err| Error::new(ErrorType::ReadFailed, err.to_string()))?;
     info.class = byte_to_elfclass(class_buff[0])?;
     Ok(())
@@ -30,7 +30,7 @@ fn read_class(file: &mut std::fs::File, info: &mut ELFIdentity) -> Result<(), Er
 
 fn read_endianness(file: &mut std::fs::File, info: &mut ELFIdentity) -> Result<(), Error> {
     let mut header_buff: [u8; 1] = [0; 1];
-    file.read(&mut header_buff)
+    file.read_exact(&mut header_buff)
         .map_err(|err| Error::new(ErrorType::ReadFailed, err.to_string()))?;
     info.endianness = byte_to_elfendian(header_buff[0])?;
     Ok(())
@@ -38,7 +38,7 @@ fn read_endianness(file: &mut std::fs::File, info: &mut ELFIdentity) -> Result<(
 
 fn read_version(file: &mut std::fs::File, info: &mut ELFIdentity) -> Result<(), Error> {
     let mut header_buff: [u8; 1] = [0; 1];
-    file.read(&mut header_buff)
+    file.read_exact(&mut header_buff)
         .map_err(|err| Error::new(ErrorType::ReadFailed, err.to_string()))?;
     info.version = header_buff[0];
     Ok(())
@@ -46,7 +46,7 @@ fn read_version(file: &mut std::fs::File, info: &mut ELFIdentity) -> Result<(), 
 
 fn read_abi(file: &mut std::fs::File, info: &mut ELFIdentity) -> Result<(), Error> {
     let mut header_buff: [u8; 1] = [0; 1];
-    file.read(&mut header_buff)
+    file.read_exact(&mut header_buff)
         .map_err(|err| Error::new(ErrorType::ReadFailed, err.to_string()))?;
     info.abi = header_buff[0];
     Ok(())
@@ -54,7 +54,7 @@ fn read_abi(file: &mut std::fs::File, info: &mut ELFIdentity) -> Result<(), Erro
 
 fn read_abi_version(file: &mut std::fs::File, info: &mut ELFIdentity) -> Result<(), Error> {
     let mut header_buff: [u8; 1] = [0; 1];
-    file.read(&mut header_buff)
+    file.read_exact(&mut header_buff)
         .map_err(|err| Error::new(ErrorType::ReadFailed, err.to_string()))?;
     info.abi_version = header_buff[0];
     Ok(())
