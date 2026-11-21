@@ -8,6 +8,7 @@ pub enum ErrorType {
     NotELFFile,
     UnknownELFClass,
     UnknownELFEndianness,
+    UnknownELFType,
 }
 
 impl Display for ErrorType {
@@ -30,6 +31,9 @@ impl Display for ErrorType {
             }
             ErrorType::UnknownELFEndianness => {
                 write!(f, "UnknownELFEndianness")
+            }
+            ErrorType::UnknownELFType => {
+                write!(f, "UnknownELFType")
             }
         }
     }

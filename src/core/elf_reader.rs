@@ -1,8 +1,8 @@
 use crate::core::error::{Error, ErrorType};
-use crate::core::info::{ELFInfo, byte_to_elfclass, byte_to_elfendian};
+use crate::core::info::{byte_to_elfclass, byte_to_elfendian, ELFHeader, ELFIdentity, ELFInfo, bytes_to_elftype, bytes_to_elfmachine};
 use std::io::Read;
 
-fn read_sign(file: &mut std::fs::File, info: &mut ELFInfo) -> Result<(), Error> {
+fn read_sign(file: &mut std::fs::File, info: &mut ELFIdentity) -> Result<(), Error> {
     let mut header_buff: [u8; 4] = [0; 4];
     file.read(&mut header_buff)
         .map_err(|err| Error::new(ErrorType::ReadFailed, err.to_string()))?;
@@ -20,7 +20,7 @@ fn read_sign(file: &mut std::fs::File, info: &mut ELFInfo) -> Result<(), Error> 
     ))
 }
 
-fn read_class(file: &mut std::fs::File, info: &mut ELFInfo) -> Result<(), Error> {
+fn read_class(file: &mut std::fs::File, info: &mut ELFIdentity) -> Result<(), Error> {
     let mut class_buff: [u8; 1] = [0; 1];
     file.read(&mut class_buff)
         .map_err(|err| Error::new(ErrorType::ReadFailed, err.to_string()))?;
@@ -28,7 +28,7 @@ fn read_class(file: &mut std::fs::File, info: &mut ELFInfo) -> Result<(), Error>
     Ok(())
 }
 
-fn read_endianness(file: &mut std::fs::File, info: &mut ELFInfo) -> Result<(), Error> {
+fn read_endianness(file: &mut std::fs::File, info: &mut ELFIdentity) -> Result<(), Error> {
     let mut header_buff: [u8; 1] = [0; 1];
     file.read(&mut header_buff)
         .map_err(|err| Error::new(ErrorType::ReadFailed, err.to_string()))?;
@@ -36,7 +36,7 @@ fn read_endianness(file: &mut std::fs::File, info: &mut ELFInfo) -> Result<(), E
     Ok(())
 }
 
-fn read_version(file: &mut std::fs::File, info: &mut ELFInfo) -> Result<(), Error> {
+fn read_version(file: &mut std::fs::File, info: &mut ELFIdentity) -> Result<(), Error> {
     let mut header_buff: [u8; 1] = [0; 1];
     file.read(&mut header_buff)
         .map_err(|err| Error::new(ErrorType::ReadFailed, err.to_string()))?;
@@ -44,7 +44,7 @@ fn read_version(file: &mut std::fs::File, info: &mut ELFInfo) -> Result<(), Erro
     Ok(())
 }
 
-fn read_abi(file: &mut std::fs::File, info: &mut ELFInfo) -> Result<(), Error> {
+fn read_abi(file: &mut std::fs::File, info: &mut ELFIdentity) -> Result<(), Error> {
     let mut header_buff: [u8; 1] = [0; 1];
     file.read(&mut header_buff)
         .map_err(|err| Error::new(ErrorType::ReadFailed, err.to_string()))?;
@@ -52,7 +52,7 @@ fn read_abi(file: &mut std::fs::File, info: &mut ELFInfo) -> Result<(), Error> {
     Ok(())
 }
 
-fn read_abi_version(file: &mut std::fs::File, info: &mut ELFInfo) -> Result<(), Error> {
+fn read_abi_version(file: &mut std::fs::File, info: &mut ELFIdentity) -> Result<(), Error> {
     let mut header_buff: [u8; 1] = [0; 1];
     file.read(&mut header_buff)
         .map_err(|err| Error::new(ErrorType::ReadFailed, err.to_string()))?;
@@ -60,23 +60,51 @@ fn read_abi_version(file: &mut std::fs::File, info: &mut ELFInfo) -> Result<(), 
     Ok(())
 }
 
-fn read_padding(file: &mut std::fs::File, info: &mut ELFInfo) -> Result<(), Error> {
+fn read_padding(file: &mut std::fs::File, info: &mut ELFIdentity) -> Result<(), Error> {
     let mut header_buff: [u8; 7] = [0; 7];
     file.read(&mut header_buff).map_err(|err|Error::new(ErrorType::ReadFailed, err.to_string()))?;
     info.padding = header_buff;
     Ok(())
 }
 
-pub fn read_header(path: String) -> Result<ELFInfo, Error> {
+fn read_identity(file: &mut std::fs::File) -> Result<ELFIdentity, Error> {
+    let mut info = ELFIdentity::new();
+    read_sign(file,&mut info)?;
+    read_class(file,&mut info)?;
+    read_endianness(file,&mut info)?;
+    read_version(file,&mut info)?;
+    read_abi(file,&mut info)?;
+    read_abi_version(file,&mut info)?;
+    read_padding(file,&mut info)?;
+    Ok(info)
+}
+
+fn read_type(file: &mut std::fs::File, info : &mut ELFInfo) -> Result<(), Error> {
+    let mut header_buff: [u8; 2] = [0; 2];
+    file.read_exact(&mut header_buff).map_err(|err|{Error::new(ErrorType::ReadFailed, err.to_string())})?;
+    info.e_type = bytes_to_elftype(header_buff)?;
+    Ok(())
+}
+
+fn read_machine(file: &mut std::fs::File, info : &mut ELFInfo) -> Result<(), Error> {
+    let mut header_buff: [u8; 2] = [0; 2];
+    file.read_exact(&mut header_buff).map_err(|err|{Error::new(ErrorType::ReadFailed, err.to_string())})?;
+    info.e_machine = bytes_to_elfmachine(header_buff)?;
+    Ok(())
+}
+
+fn read_info(file: &mut std::fs::File) -> Result<ELFInfo, Error> {
+    let mut info = ELFInfo::new();
+    read_type(file,&mut info)?;
+    read_machine(file,&mut info)?;
+    Ok(info)
+}
+
+pub fn read_header(path: String) -> Result<ELFHeader, Error> {
     let mut file = std::fs::File::open(path)
         .map_err(|err| Error::new(ErrorType::CantOpenFile, err.to_string()))?;
-    let mut info = ELFInfo::new();
-    read_sign(&mut file, &mut info)?;
-    read_class(&mut file, &mut info)?;
-    read_endianness(&mut file, &mut info)?;
-    read_version(&mut file, &mut info)?;
-    read_abi(&mut file, &mut info)?;
-    read_abi_version(&mut file, &mut info)?;
-    read_padding(&mut file, &mut info)?;
-    Ok(info)
+    let mut header = ELFHeader::new();
+    header.identity = read_identity(&mut file)?;
+    header.info = read_info(&mut file)?;
+    Ok(header)
 }
