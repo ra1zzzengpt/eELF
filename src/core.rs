@@ -1,4 +1,10 @@
 pub mod elf_reader;
+mod elfclass;
+mod elfendianness;
+mod elfheader;
+mod elfidentity;
+mod elfinfo;
+mod elfmachine;
+mod elftype;
 pub mod error;
-pub mod info;
 pub mod io;
