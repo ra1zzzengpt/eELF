@@ -1,7 +1,7 @@
+use crate::core::elf::program_header::PType::Unknown;
 use std::fmt::{Display, Formatter};
-use crate::core::program_header::PType::Unknown;
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum PType {
     PtNull,
     PtLoad,
@@ -14,7 +14,7 @@ pub enum PType {
 }
 
 impl PType {
-    pub fn from_bytes(bytes : [u8; 4]) -> Self {
+    pub fn from_bytes(bytes: [u8; 4]) -> Self {
         match u32::from_le_bytes(bytes) {
             0 => PType::PtNull,
             1 => PType::PtLoad,

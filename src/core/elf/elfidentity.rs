@@ -1,5 +1,5 @@
-use crate::core::elfclass::ELFClass;
-use crate::core::elfendianness::ELFEndianness;
+use crate::core::elf::elfclass::ELFClass;
+use crate::core::elf::elfendianness::ELFEndianness;
 use crate::core::error::{Error, ErrorType};
 use std::fmt::{Display, Formatter};
 

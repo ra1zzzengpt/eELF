@@ -1,11 +1,4 @@
-pub mod elf_reader;
-mod elfclass;
-mod elfendianness;
-mod elfheader;
-mod elfidentity;
-mod elfinfo;
-mod elfmachine;
-mod elftype;
 pub mod error;
 pub mod io;
-mod program_header;
+pub mod elf;
+pub mod ai;

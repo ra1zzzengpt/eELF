@@ -9,34 +9,9 @@ pub enum ErrorType {
     UnknownELFClass,
     UnknownELFEndianness,
     UnknownELFType,
-}
-
-impl Display for ErrorType {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        match &self {
-            ErrorType::CantOpenFile => {
-                write!(f, "CantOpenFile")
-            }
-            ErrorType::ArgumentsError => {
-                write!(f, "ArgumentsError")
-            }
-            ErrorType::ReadFailed => {
-                write!(f, "ReadFailed")
-            }
-            ErrorType::NotELFFile => {
-                write!(f, "NotELFFile")
-            }
-            ErrorType::UnknownELFClass => {
-                write!(f, "UnknownELFClass")
-            }
-            ErrorType::UnknownELFEndianness => {
-                write!(f, "UnknownELFEndianness")
-            }
-            ErrorType::UnknownELFType => {
-                write!(f, "UnknownELFType")
-            }
-        }
-    }
+    UnsupportedBinaryFormat,
+    CannotFindStrtab,
+    NetworkError,
 }
 
 #[derive(Debug)]
@@ -56,6 +31,6 @@ impl Error {
 
 impl Display for Error {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}: {}", self.error_type, self.message)
+        write!(f, "{:?}: {}", self.error_type, self.message)
     }
 }

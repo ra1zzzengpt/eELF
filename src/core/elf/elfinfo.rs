@@ -1,6 +1,5 @@
-use crate::core::elfmachine::ELFMachine;
-use crate::core::elftype::ELFType;
-use crate::core::program_header::ProgramHeader;
+use crate::core::elf::elfmachine::ELFMachine;
+use crate::core::elf::elftype::ELFType;
 use std::fmt::{Display, Formatter};
 
 #[derive(Debug)]
@@ -18,7 +17,6 @@ pub struct ELFInfo {
     pub e_shentsize: u16,
     pub e_shnum: u16,
     pub e_shstrndx: u16,
-    pub program_headers: Vec<ProgramHeader>,
 }
 
 impl ELFInfo {
@@ -37,7 +35,6 @@ impl ELFInfo {
             e_shentsize: 0,
             e_shnum: 0,
             e_shstrndx: 0,
-            program_headers: Vec::new(),
         }
     }
 }
@@ -73,10 +70,6 @@ impl Display for ELFInfo {
             self.e_shentsize
         )?;
         writeln!(f, "e_shstrndx: {}", self.e_shstrndx)?;
-        writeln!(f, "Program Headers:")?;
-        for header in &self.program_headers {
-            writeln!(f, "  {}", header)?;
-        }
         Ok(())
     }
 }

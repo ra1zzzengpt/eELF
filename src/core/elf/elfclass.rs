@@ -2,7 +2,7 @@ use crate::core::error::Error;
 use crate::core::error::ErrorType::UnknownELFClass;
 use std::fmt::{Display, Formatter};
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum ELFClass {
     Bit32,
     Bit64,
