@@ -10,6 +10,9 @@ pub enum PType {
     PtNote,
     PtPHDR,
     PtTLS,
+    PtGnuEhFrame,
+    PtGnuStack,
+    PtGnuRelro,
     Unknown(u32),
 }
 
@@ -23,6 +26,9 @@ impl PType {
             4 => PType::PtNote,
             6 => PType::PtPHDR,
             7 => PType::PtTLS,
+            0x6474e550 => PType::PtGnuEhFrame,
+            0x6474e551 => PType::PtGnuStack,
+            0x6474e552 => PType::PtGnuRelro,
             _ => PType::Unknown(u32::from_le_bytes(bytes)),
         }
     }
@@ -31,6 +37,25 @@ impl PType {
 impl Default for PType {
     fn default() -> Self {
         Unknown(0)
+    }
+}
+
+impl Display for PType {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        let name = match self {
+            PType::PtNull => "PT_NULL".to_string(),
+            PType::PtLoad => "PT_LOAD".to_string(),
+            PType::PtDynamic => "PT_DYNAMIC".to_string(),
+            PType::PtInterp => "PT_INTERP".to_string(),
+            PType::PtNote => "PT_NOTE".to_string(),
+            PType::PtPHDR => "PT_PHDR".to_string(),
+            PType::PtTLS => "PT_TLS".to_string(),
+            PType::PtGnuEhFrame => "PT_GNU_EH_FRAME".to_string(),
+            PType::PtGnuStack => "PT_GNU_STACK".to_string(),
+            PType::PtGnuRelro => "PT_GNU_RELRO".to_string(),
+            PType::Unknown(value) => format!("UNKNOWN({:#x})", value),
+        };
+        f.pad(&name)
     }
 }
 
@@ -48,17 +73,22 @@ pub struct ProgramHeader {
 
 impl Display for ProgramHeader {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        let flags = format!(
+            "{}{}{}",
+            if self.p_flags & 4 != 0 { 'R' } else { '-' },
+            if self.p_flags & 2 != 0 { 'W' } else { '-' },
+            if self.p_flags & 1 != 0 { 'X' } else { '-' }
+        );
         write!(
             f,
-            "{:?} off={:#x} vaddr={:#x} paddr={:#x} filesz={:#x} memsz={:#x} flags={} align={:#x}",
+            "{:<20} {:^11} {:^11} {:^11} {:^11} {:^5} {:^12}",
             self.p_type,
-            self.p_offset,
-            self.p_vaddr,
-            self.p_paddr,
-            self.p_filesz,
-            self.p_memsz,
-            self.p_flags,
-            self.p_align,
+            format!("{:#08x}", self.p_offset),
+            format!("{:#08x}", self.p_vaddr),
+            format!("{:#08x}", self.p_filesz),
+            format!("{:#08x}", self.p_memsz),
+            term_ansi::red!("{}", flags),
+            format!("{:#010x}", self.p_align)
         )
     }
 }

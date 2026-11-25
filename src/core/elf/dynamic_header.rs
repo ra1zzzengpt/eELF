@@ -140,7 +140,15 @@ pub struct DynamicHeader {
 
 impl Display for DynamicHeader {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{:?} value={:#x}", self.tag, self.value)
+        let tag = format!("{:?}", self.tag);
+        let padding = 20usize.saturating_sub(tag.len());
+        write!(
+            f,
+            "  {}{}  {}",
+            term_ansi::cyan!("{}", tag),
+            " ".repeat(padding),
+            term_ansi::green!("{:#018x} ({})", self.value, self.value)
+        )
     }
 }
 

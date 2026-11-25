@@ -1,27 +1,57 @@
 pub mod core;
 
-use crate::core::ai::deepseek::DeepSeek;
 use self::core::elf::elf_reader::read_elf_file;
-use crate::core::io::{get_params_without_first, print_error};
+use crate::core::ai::deepseek::DeepSeek;
+use crate::core::cli::Cli;
+use crate::core::error::Error;
+use crate::core::storage::{load_token, save_token};
+use clap::Parser;
+
+fn print_error(error: &Error) {
+    println!("{}", term_ansi::red!("{}", error.to_string()));
+}
 fn main() {
-    let args = match get_params_without_first() {
-        Ok(args) => args,
-        Err(error) => {
-            print_error(&error);
-            return;
-        }
-    };
-    match read_elf_file(args[0].clone()) {
-        Ok(elf) => {
-            println!("{}", elf);
-            let deepseek = DeepSeek::new(API_KEY_WIP,"https://api.deepseek.com/responses".to_string());
-            match deepseek.analyze(elf.dependencies.clone(),"debian".to_string()) {
-                Ok(answer) => {println!("{}", answer);}
-                Err(error) => {print_error(&error)}
+    let cli = Cli::parse();
+    if let Some(token) = cli.token {
+        match save_token("eelf-token.txt".to_string(), token) {
+            Ok(_) => {}
+            Err(e) => print_error(&e),
+        };
+    }
+    if let Some(path) = cli.path {
+        match read_elf_file(path) {
+            Ok(elf) => {
+                elf.display(
+                    cli.header,
+                    cli.program_headers,
+                    cli.dynamic_headers,
+                    cli.dependencies,
+                );
+                if let Some(distro) = cli.ai {
+                    match load_token("eelf-token.txt".to_string()) {
+                        Ok(token) => {
+                            let deepseek = DeepSeek::new(
+                                token,
+                                "https://api.deepseek.com/responses".to_string(),
+                            );
+                            println!("DeepSeek thinking...");
+                            match deepseek.analyze(&elf.dependencies, &distro) {
+                                Ok(answer) => {
+                                    println!(
+                                        "Install for {distro}: {}",
+                                        term_ansi::yellow!("{}", answer)
+                                    );
+                                }
+                                Err(e) => print_error(&e),
+                            }
+                        }
+                        Err(e) => print_error(&e),
+                    }
+                }
             }
-        }
-        Err(e) => {
-            print_error(&e);
-        }
-    };
+            Err(e) => {
+                print_error(&e);
+            }
+        };
+    }
 }

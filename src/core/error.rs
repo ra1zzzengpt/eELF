@@ -12,6 +12,7 @@ pub enum ErrorType {
     UnsupportedBinaryFormat,
     CannotFindStrtab,
     NetworkError,
+    StorageError,
 }
 
 #[derive(Debug)]

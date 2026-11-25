@@ -43,33 +43,32 @@ impl Display for ELFInfo {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         writeln!(
             f,
-            "e_type:      {:<12}  e_machine: {:<12}  e_version: {}",
-            self.e_type, self.e_machine, self.e_version
+            "{}",
+            term_ansi::bold!("{}", term_ansi::cyan!("ELF HEADER"))
+        )?;
+        writeln!(f, "  {:<22} {}", "Type", self.e_type)?;
+        writeln!(f, "  {:<22} {}", "Machine", self.e_machine)?;
+        writeln!(f, "  {:<22} {}", "Version", self.e_version)?;
+        writeln!(
+            f,
+            "  {:<22} {}",
+            "Entry point",
+            term_ansi::green!("{:#018x}", self.e_entry)
+        )?;
+        writeln!(f, "  {:<22} {:#010x}", "Flags", self.e_flags)?;
+        writeln!(f, "  {:<22} {} bytes", "ELF header size", self.e_ehsize)?;
+        writeln!(f)?;
+        writeln!(f, "{}", term_ansi::bold!("TABLE LOCATIONS"))?;
+        writeln!(
+            f,
+            "  {:<22} {} entries at {:#018x} ({} bytes each)",
+            "Program headers", self.e_phnum, self.e_phoff, self.e_phentsize
         )?;
         writeln!(
             f,
-            "e_entry:     {}  e_flags:   {:#010x}  e_ehsize: {}",
-            term_ansi::green!("{:#018x}", self.e_entry),
-            self.e_flags,
-            self.e_ehsize
+            "  {:<22} {} entries at {:#018x} ({} bytes each)",
+            "Section headers", self.e_shnum, self.e_shoff, self.e_shentsize
         )?;
-        writeln!(f, "Program Header Table:")?;
-        writeln!(
-            f,
-            "   e_phoff:   {}  e_phnum:   {}  e_phentsize: {}",
-            term_ansi::green!("{:#018x}", self.e_phoff),
-            self.e_phnum,
-            self.e_phentsize
-        )?;
-        writeln!(f, "Section Header Table:")?;
-        writeln!(
-            f,
-            "   e_shoff:   {}  e_shnum:   {}  e_shentsize: {}",
-            term_ansi::green!("{:#018x}", self.e_shoff),
-            self.e_shnum,
-            self.e_shentsize
-        )?;
-        writeln!(f, "e_shstrndx: {}", self.e_shstrndx)?;
-        Ok(())
+        write!(f, "  {:<22} {}", "Section names index", self.e_shstrndx)
     }
 }

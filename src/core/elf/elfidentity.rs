@@ -49,18 +49,41 @@ impl ELFIdentity {
 
 impl Display for ELFIdentity {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(
+        writeln!(
             f,
-            "ELF: {:^5} Class: {:^5} Endianness: {:^5}\n\
-            Version: {:^5} ABI: {:^5} ABI version: {:^5}\n\
-            Padding: {:^5}",
-            term_ansi::green!("{}", self.ident),
-            term_ansi::green!("{}", self.class),
-            term_ansi::green!("{}", self.endianness),
-            term_ansi::green!("{}", self.version),
-            term_ansi::green!("{}", self.abi),
-            term_ansi::green!("{}", self.abi_version),
-            term_ansi::green!("{:?}", self.padding)
-        )
+            "{}",
+            term_ansi::bold!("{}", term_ansi::cyan!("ELF IDENTIFICATION"))
+        )?;
+        writeln!(
+            f,
+            "  {:<18} {}",
+            "Magic",
+            if self.ident {
+                term_ansi::green!("ELF (7f 45 4c 46)")
+            } else {
+                term_ansi::red!("invalid")
+            }
+        )?;
+        writeln!(
+            f,
+            "  {:<18} {}",
+            "Class",
+            term_ansi::green!("{}", self.class)
+        )?;
+        writeln!(
+            f,
+            "  {:<18} {}",
+            "Byte order",
+            term_ansi::green!("{}", self.endianness)
+        )?;
+        writeln!(
+            f,
+            "  {:<18} {}",
+            "Version",
+            term_ansi::green!("{}", self.version)
+        )?;
+        writeln!(f, "  {:<18} {:#04x}", "OS/ABI", self.abi)?;
+        writeln!(f, "  {:<18} {:#04x}", "ABI version", self.abi_version)?;
+        write!(f, "  {:<18} {:02x?}", "Padding", self.padding)
     }
 }

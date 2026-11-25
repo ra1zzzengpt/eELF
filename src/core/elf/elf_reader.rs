@@ -326,8 +326,10 @@ pub fn read_elf_file(path: String) -> Result<ELFFile, Error> {
             .ok_or(Error::new(
                 CannotFindStrtab,
                 "can't find dynamic program header".to_string(),
-            ))?.p_offset,
+            ))?
+            .p_offset,
     )?;
-    elf.dependencies = read_dynamic_strtable(&mut file, &elf.program_headers, &elf.dynamic_headers)?;
+    elf.dependencies =
+        read_dynamic_strtable(&mut file, &elf.program_headers, &elf.dynamic_headers)?;
     Ok(elf)
 }
