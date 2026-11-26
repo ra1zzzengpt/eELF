@@ -26,4 +26,4 @@ Options:
 - `-a, --ai <DISTRO>` — request package-installation suggestions for a distribution, such as `debian`.
 - `-t, --token <TOKEN>` — save a DeepSeek API token for AI suggestions.
 
-The token is saved to `eelf-token.txt` in the current working directory. Run EasyELF from that directory when using `--ai` so it can load the saved token.
+The token is saved to `~/.config/eelf/eelf-token.txt` in the current working directory. Run EasyELF from that directory when using `--ai` so it can load the saved token.

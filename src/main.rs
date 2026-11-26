@@ -4,7 +4,7 @@ use self::core::elf::elf_reader::read_elf_file;
 use crate::core::ai::deepseek::DeepSeek;
 use crate::core::cli::Cli;
 use crate::core::error::Error;
-use crate::core::storage::{load_token, save_token};
+use crate::core::storage::{load_token, save_token, token_path};
 use clap::Parser;
 
 fn print_error(error: &Error) {
@@ -13,7 +13,7 @@ fn print_error(error: &Error) {
 fn main() {
     let cli = Cli::parse();
     if let Some(token) = cli.token {
-        match save_token("eelf-token.txt".to_string(), token) {
+        match token_path().and_then(|path| save_token(path, token)) {
             Ok(_) => {}
             Err(e) => print_error(&e),
         };
@@ -28,7 +28,7 @@ fn main() {
                     cli.dependencies,
                 );
                 if let Some(distro) = cli.ai {
-                    match load_token("eelf-token.txt".to_string()) {
+                    match token_path().and_then(load_token) {
                         Ok(token) => {
                             let deepseek = DeepSeek::new(
                                 token,
